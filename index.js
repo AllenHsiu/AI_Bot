@@ -41,27 +41,31 @@ app.post('/webhook', (req, res, next) => {
     return res.status(500).send('LINE_CHANNEL_SECRET not set');
   }
   return lineMiddleware(lineConfig)(req, res, next);
-}, async (req, res) => {
+}, (req, res) => {
   try {
     const events = req.body?.events ?? [];
-    if (!Array.isArray(events)) {
-      return res.status(200).send('OK');
-    }
+    // 先立即回 200 給 LINE，避免逾時；再在背景處理
+    res.status(200).send('OK');
 
+    if (!Array.isArray(events) || events.length === 0) return;
+
+    console.log('[webhook] received events:', events.length);
     for (const ev of events) {
-      await handleEvent(ev).catch((err) => {
+      handleEvent(ev).catch((err) => {
         console.error('handleEvent error:', err);
       });
     }
-
-    res.status(200).send('OK');
   } catch (err) {
     console.error('webhook error:', err);
-    res.status(500).end();
+    if (!res.headersSent) res.status(500).end();
   }
 });
 
+// 部分環境會對 webhook 發 GET，回 200 避免報錯
+app.get('/webhook', (req, res) => res.status(200).send('OK'));
+
 async function handleEvent(event) {
+  console.log('[handleEvent] type:', event.type, 'messageType:', event.message?.type);
   if (event.type !== 'message' || event.message?.type !== 'text') {
     return;
   }
@@ -97,6 +101,7 @@ async function handleEvent(event) {
       '抱歉，我暫時無法產生回覆。';
 
     await replyText(replyToken, replyContent);
+    console.log('[handleEvent] replied to user');
   } catch (err) {
     console.error('OpenAI error:', err);
     const message =

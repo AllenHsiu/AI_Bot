@@ -109,6 +109,34 @@ git push -u origin main
 
 ---
 
+## 機器人沒回覆時請檢查
+
+1. **Render 服務有在跑**  
+   - Dashboard 裡該 Web Service 狀態是否為 **Live**。  
+   - Free 方案閒置約 15 分鐘會休眠，第一次傳訊息可能要等 30 秒～1 分鐘才會醒來，可多傳一次試試。
+
+2. **LINE Webhook 有設定成功**  
+   - [LINE Developers Console](https://developers.line.biz/console/) → 你的 Channel → **Messaging API**。  
+   - **Webhook URL** 填：`https://你的-render-網址.onrender.com/webhook`（結尾是 `/webhook`）。  
+   - 按 **Verify**，應顯示成功。  
+   - **Use webhook** 要開啟；可關閉 **Auto-reply messages**。
+
+3. **環境變數都有設**  
+   - Render → 你的 Service → **Environment**。  
+   - 要有：`OPENAI_API_KEY`、`LINE_CHANNEL_ACCESS_TOKEN`、`LINE_CHANNEL_SECRET`。  
+   - 改完要 **Save**，必要時手動 **Manual Deploy** 一次。
+
+4. **看 Render Logs**  
+   - Render → 你的 Service → **Logs**。  
+   - 傳訊息給機器人時，應看到 `[webhook] received events: 1`、`[handleEvent] type: message`。  
+   - 若有錯誤（例如 `OpenAI error`、`LINE client not configured`），依訊息修正設定或金鑰。
+
+5. **健康檢查**  
+   - 瀏覽器開：`https://你的-render-網址.onrender.com/`。  
+   - 應看到 JSON，且 `hasOpenAI`、`hasLineToken`、`hasLineSecret` 為 `true`；若有 `false` 代表該環境變數沒設好。
+
+---
+
 ## API 說明
 
 - `GET /`：健康檢查，可確認服務與環境變數是否就緒

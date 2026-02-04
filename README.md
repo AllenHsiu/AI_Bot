@@ -52,7 +52,20 @@ npm run dev
 
 ### 1. 程式碼推上 Git
 
-將此專案推送到 GitHub 或 GitLab（**請勿將 `.env` 或真實 API Key 提交到版本庫**）。
+專案已設定遠端 `https://github.com/AllenHsiu/AI_Bot.git`。在專案目錄執行：
+
+```bash
+git push -u origin main
+```
+
+若使用 SSH，可先改遠端網址再推送：
+
+```bash
+git remote set-url origin git@github.com:AllenHsiu/AI_Bot.git
+git push -u origin main
+```
+
+**請勿將 `.env` 或真實 API Key 提交到版本庫**（`.gitignore` 已排除 `.env`）。
 
 ### 2. 在 Render 建立 Web Service
 
